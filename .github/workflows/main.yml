@@ -35,11 +35,5 @@ jobs:
 
         $GHDL --version
     
-    
-    
-#     - name: Install ghdl
-#       run: |
-#         sudo apt install -y ghdl
-    
     - name: Run barrel_shifter test
       run: make
