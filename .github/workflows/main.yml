@@ -39,7 +39,10 @@ jobs:
         $GHDL --version
     
     - name: regression
-      run: SIM=ghdl pytest -n auto -o log_cli=True --junitxml=test-results.xml --cocotbxml=test-cocotb.xml
+      run: |
+        SIM=ghdl pytest -n auto -o log_cli=True --junitxml=test-results.xml --cocotbxml=test-cocotb.xml
       
-#     - name: Functional Coverage
-#       run: cat coverage.xml | grep -o -E 'cover_percentage.{0,6}' | head -1 | cut -f2- -d\"
+    - name: Functional Coverage
+      run: |
+        var=$(cat coverage.xml | grep -o -E 'cover_percentage.{0,6}' | head -1 | cut -f2- -d\")
+        if [ $var = 100 ]; then exit 0; else exit 1; fi
