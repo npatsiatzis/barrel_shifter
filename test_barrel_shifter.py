@@ -10,7 +10,7 @@ tests_dir = os.path.abspath(os.path.dirname(__file__)) #gives the path to the te
 rtl_dir = tests_dir                                    #path to hdl folder where .vhdd files are placed
 
 module = "testbench"
-toplevel = "barrel_shifterrrrr"   
+toplevel = "barrel_shifter"   
 vhdl_sources = [
     os.path.join(rtl_dir, "barrel_shifter.vhd"),
     ]
