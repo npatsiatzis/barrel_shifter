@@ -7,6 +7,7 @@ import numpy as np
 import random
 
 full = False
+covered_value = []
 
 def sum_pow_2(length,vector):
 	sum = 0
@@ -31,7 +32,7 @@ def notify_full():
 @CoverPoint("top.i_data",xf = lambda x : x.i_data.value,bins = list(range(2**10)),at_least=1)
 @CoverCross("top.shift_amt_X_i_data", items = ["top.shift_amt","top.i_data"], at_least=1)
 def number_cover(dut):
-	pass
+	covered_value.append(dut.i_data.value)
 
 async def init(dut,cycles=1):
 
@@ -55,6 +56,8 @@ async def test(dut):
 		shift_left = random.randint(0,1)
 		shift_amt = random.randint(0,2**5-1)
 		data = random.randint(0,2**10-1)
+		while(data in covered_value):
+			data = random.randint(0,2**10-1)
 
 		dut.i_signed.value = signed
 		dut.i_shift_left.value = shift_left
@@ -73,5 +76,8 @@ async def test(dut):
 		await RisingEdge(dut.i_clk)
 		assert not (np.uint32(expected_value) != int(dut.o_data.value)),"Different expected to actual data, signed"
 
-		coverage_db["top.i_data"].add_threshold_callback(notify_full, 40)
+		coverage_db["top.i_data"].add_threshold_callback(notify_full, 100)
 		number_cover(dut)
+
+	coverage_db.report_coverage(cocotb.log.info,bins=True)
+	coverage_db.export_to_xml(filename="coverage.xml")
