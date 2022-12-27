@@ -24,9 +24,22 @@ jobs:
         pip install -r requirements.txt
         pip install cocotb-coverage
     
-    - name: Install ghdl
-      run: |
-        sudo apt install -y ghdl
+    
+    
+    - uses: ghdl/setup-ghdl-ci@nightly
+      with:
+        backend: llvm
+
+    - run: |
+        ghdl --version
+
+        $GHDL --version
+    
+    
+    
+#     - name: Install ghdl
+#       run: |
+#         sudo apt install -y ghdl
     
     - name: Run barrel_shifter test
       run: make
