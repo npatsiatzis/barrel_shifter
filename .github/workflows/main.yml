@@ -8,7 +8,7 @@ jobs:
         python-version: [3.10.6]
   
     env:
-      SIM: icarus
+      SIM: ghdl
 
     steps:
     - uses: actions/checkout@v2
