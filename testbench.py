@@ -3,7 +3,7 @@ from cocotb.clock import Clock
 from cocotb.triggers import Timer,RisingEdge,FallingEdge,ClockCycles,ReadOnly
 from cocotb.result import TestFailure,TestSuccess
 from cocotb_coverage.coverage import CoverCross,CoverPoint,coverage_db
-# import numpy as np
+import numpy as np
 import random
 
 full = False
