@@ -36,4 +36,4 @@ jobs:
         $GHDL --version
     
     - name: Run barrel_shifter test
-      run: make
+      run: SIM=ghdl pytest -n auto -o log_cli=True --junitxml=test-results.xml --cocotbxml=test-cocotb.xml
