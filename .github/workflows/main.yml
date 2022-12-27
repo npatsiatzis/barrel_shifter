@@ -23,7 +23,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install cocotb-coverage
+        pip install cocotb-test
         pip install pytest
+        pip install pytest-parallel
+        pip install pytest-xdist
     
     
     - uses: ghdl/setup-ghdl-ci@nightly
