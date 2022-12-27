@@ -73,5 +73,5 @@ async def test(dut):
 		await RisingEdge(dut.i_clk)
 		assert not (np.uint32(expected_value) != int(dut.o_data.value)),"Different expected to actual data, signed"
 
-		coverage_db["top.i_data"].add_threshold_callback(notify_full, 100)
+		coverage_db["top.i_data"].add_threshold_callback(notify_full, 40)
 		number_cover(dut)

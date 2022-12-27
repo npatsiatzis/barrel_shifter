@@ -12,6 +12,7 @@ VHDL_SOURCES += $(PWD)/barrel_shifter.vhd
 # TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
 # MODULE is the basename of the Python test file
 
+
 test:
 		rm -rf sim_build
 		$(MAKE) sim MODULE=testbench TOPLEVEL=barrel_shifter
