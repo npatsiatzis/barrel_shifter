@@ -1,5 +1,5 @@
-![example branch parameter](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/main.yml/badge.svg?branch=regression)
-![example branch parameter](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/main.yml/badge.svg?branch=Functional%20Coverage)
+![example workflow](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/main.yml/badge.svg)
+![example workflow](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/coverage.yml/badge.svg)
 ### barrel-shifter RTL implementation
 
 
