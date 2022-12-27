@@ -38,5 +38,8 @@ jobs:
 
         $GHDL --version
     
-    - name: Run barrel_shifter test
+    - name: regression
       run: SIM=ghdl pytest -n auto -o log_cli=True --junitxml=test-results.xml --cocotbxml=test-cocotb.xml
+      
+#     - name: Functional Coverage
+#       run: cat coverage.xml | grep -o -E 'cover_percentage.{0,6}' | head -1 | cut -f2- -d\"
