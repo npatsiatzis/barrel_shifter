@@ -23,7 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install cocotb-coverage
-    
+        pip install pytest
     
     
     - uses: ghdl/setup-ghdl-ci@nightly
