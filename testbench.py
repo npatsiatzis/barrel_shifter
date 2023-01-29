@@ -28,11 +28,11 @@ def notify_full():
 # a bin must be hit to considered covered
 @CoverPoint("top.signed",xf = lambda x : x.i_signed.value, bins = [True,False], at_least=1)
 @CoverPoint("top.shift_left",xf = lambda x : x.i_shift_left.value, bins = [True,False],at_least=1)
-@CoverPoint("top.shift_amt",xf = lambda x : x.i_shift_amt.value,bins = list(range(2**5)),at_least=1)
-@CoverPoint("top.i_data",xf = lambda x : x.i_data.value,bins = list(range(2**10)),at_least=1)
-@CoverCross("top.shift_amt_X_i_data", items = ["top.shift_amt","top.i_data"], at_least=1)
+@CoverPoint("top.shift_amt",xf = lambda x : x.i_shift_amt.value,bins = list(range(2**3)),at_least=1)
+@CoverPoint("top.i_data",xf = lambda x : x.i_data.value,bins = list(range(2**5)),at_least=1)
+@CoverCross("top.shift_amt_X_i_data", items = ["top.signed","top.shift_left","top.shift_amt","top.i_data"], at_least=1)
 def number_cover(dut):
-	covered_value.append(dut.i_data.value)
+	covered_value.append((dut.i_signed.value,dut.i_shift_left.value,dut.i_shift_amt.value,dut.i_data.value))
 
 async def init(dut,cycles=1):
 
@@ -54,10 +54,13 @@ async def test(dut):
 	while (full != True):	
 		signed = random.randint(0,1)
 		shift_left = random.randint(0,1)
-		shift_amt = random.randint(0,2**5-1)
-		data = random.randint(0,2**10-1)
-		while(data in covered_value):
-			data = random.randint(0,2**10-1)
+		shift_amt = random.randint(0,2**3-1)
+		data = random.randint(0,2**5-1)
+		while((signed,shift_left,shift_amt,data) in covered_value):
+			signed = random.randint(0,1)
+			shift_left = random.randint(0,1)
+			shift_amt = random.randint(0,2**3-1)
+			data = random.randint(0,2**5-1)
 
 		dut.i_signed.value = signed
 		dut.i_shift_left.value = shift_left
@@ -76,8 +79,8 @@ async def test(dut):
 		await RisingEdge(dut.i_clk)
 		assert not (np.uint32(expected_value) != int(dut.o_data.value)),"Different expected to actual data, signed"
 
-		coverage_db["top.i_data"].add_threshold_callback(notify_full, 100)
+		coverage_db["top.shift_amt_X_i_data"].add_threshold_callback(notify_full, 100)
 		number_cover(dut)
 
-	coverage_db.report_coverage(cocotb.log.info,bins=True)
+	# coverage_db.report_coverage(cocotb.log.info,bins=True)
 	coverage_db.export_to_xml(filename="coverage.xml")
