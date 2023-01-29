@@ -1,0 +1,21 @@
+[tasks]
+task_bmc
+task_cover
+
+[options]
+task_bmc: mode prove
+task_bmc: depth 2	
+task_cover: mode cover
+task_cover: depth 2
+
+[engines]
+task_bmc: smtbmc
+task_cover: smtbmc
+
+[script]
+ghdl --std=08 barrel_shifter.vhd barrel_shifter.psl -e barrel_shifter
+prep -top barrel_shifter
+
+[files]
+barrel_shifter.psl
+barrel_shifter.vhd

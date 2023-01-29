@@ -1,0 +1,28 @@
+library ieee;
+use ieee.numeric_std.all;
+
+vunit formal_test(barrel_shifter(rtl)) {
+
+	default clock is rising_edge(i_clk);
+	--#####################################################
+
+	-------------------
+	--ASSERT PROPERTIES
+	-------------------
+
+	check_SRA: assert always {i_signed ='1' and i_shift_left = '0'} |=> {o_data = std_ulogic_vector(shift_right(signed(prev(i_data)),to_integer(unsigned(prev(i_shift_amt)))))};
+	check_SRL: assert always {i_signed ='0' and i_shift_left = '0'} |=> {o_data = std_ulogic_vector(shift_right(unsigned(prev(i_data)),to_integer(unsigned(prev(i_shift_amt)))))};
+	check_SLA_SLL: assert always {i_shift_left = '1'} |=> {o_data = std_ulogic_vector(shift_left(unsigned(prev(i_data)),to_integer(unsigned(prev(i_shift_amt)))))};
+	--#####################################################
+
+	--#####################################################
+
+	-------------------
+	--COVER PROPERTIES
+	-------------------
+	--witness covers to avoid vacuous sucess
+	cover_SRA: cover {i_signed = '1' and i_shift_left = '0'; o_data = std_ulogic_vector(shift_right(signed(prev(i_data)),to_integer(unsigned(prev(i_shift_amt)))))};
+	cover_SRL: cover {i_signed = '0' and i_shift_left = '0'; o_data = std_ulogic_vector(shift_right(unsigned(prev(i_data)),to_integer(unsigned(prev(i_shift_amt)))))};
+	cover_SLA: cover {i_signed = '1' and i_shift_left = '1'; o_data = std_ulogic_vector(shift_left(unsigned(prev(i_data)),to_integer(unsigned(prev(i_shift_amt)))))};
+	cover_SLL: cover {i_signed = '0' and i_shift_left = '1'; o_data = std_ulogic_vector(shift_left(unsigned(prev(i_data)),to_integer(unsigned(prev(i_shift_amt)))))};
+}
