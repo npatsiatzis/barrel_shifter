@@ -7,7 +7,7 @@ from pyuvm import *
 import random
 import cocotb
 import pyuvm
-from utils import FifoBfm
+from utils import BarrelShiftBfm
 from cocotb_coverage.coverage import CoverCross,CoverPoint,coverage_db
 
 covered_values = [i for i in range(5)]
@@ -89,7 +89,7 @@ class Driver(uvm_driver):
         self.ap = uvm_analysis_port("ap", self)
 
     def start_of_simulation_phase(self):
-        self.bfm = FifoBfm()
+        self.bfm = BarrelShiftBfm()
 
     async def launch_tb(self):
         await self.bfm.reset()
@@ -184,7 +184,7 @@ class Monitor(uvm_component):
 
     def build_phase(self):
         self.ap = uvm_analysis_port("ap", self)
-        self.bfm = FifoBfm()
+        self.bfm = BarrelShiftBfm()
         self.get_method = getattr(self.bfm, self.method_name)
 
     async def run_phase(self):

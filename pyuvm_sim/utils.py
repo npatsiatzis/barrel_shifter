@@ -9,7 +9,7 @@ from pyuvm import utility_classes
 
 
 
-class FifoBfm(metaclass=utility_classes.Singleton):
+class BarrelShiftBfm(metaclass=utility_classes.Singleton):
     def __init__(self):
         self.dut = cocotb.top
         self.driver_queue = Queue(maxsize=1)
@@ -48,27 +48,16 @@ class FifoBfm(metaclass=utility_classes.Singleton):
                 pass
 
     async def data_mon_bfm(self):
-        # f_wr_done = 0
         while True:
-            # f_wr_done = self.dut.f_wr_done.value
             await RisingEdge(self.dut.i_clk)
             data_tuple = (self.dut.i_signed.value,self.dut.i_shift_left.value,self.dut.i_shift_amt.value,self.dut.i_data.value)
             self.data_mon_queue.put_nowait(data_tuple)
-    
-
-            # if((self.dut.f_wr_done.value ==1 and f_wr_done == 0) or (self.dut.f_wr_done.value ==1 and f_wr_done == 1)):
-            #     data = self.dut.f_data.value
-            #     self.data_mon_queue.put_nowait(data)
 
     async def result_mon_bfm(self):
-        # f_rd_done = 0 
         await RisingEdge(self.dut.i_clk)
         while True:
-            # f_rd_done = self.dut.f_rd_done.value
             await RisingEdge(self.dut.i_clk)
             self.result_mon_queue.put_nowait((self.dut.o_data.value))
-            # if((self.dut.f_rd_done.value == 1 and f_rd_done == 0) or (self.dut.f_rd_done.value == 1 and f_rd_done == 1)):
-                # self.result_mon_queue.put_nowait((self.dut.o_data.value))
 
 
     def start_bfm(self):
