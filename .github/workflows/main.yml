@@ -1,4 +1,4 @@
-name: Regression Tests
+name: Regression Test
 on: [push]
 jobs:
   run_tests:
@@ -27,6 +27,7 @@ jobs:
         pip install pytest
         pip install pytest-parallel
         pip install pytest-xdist
+        pip install pyuvm
     
     
     - uses: ghdl/setup-ghdl-ci@nightly
@@ -35,10 +36,13 @@ jobs:
 
     - run: |
         ghdl --version
-
         $GHDL --version
     
     - name: regression
       run: |
-        SIM=ghdl pytest -n auto -o log_cli=True --junitxml=test-results.xml --cocotbxml=test-cocotb.xml
- 
+        cd cocotb_sim/ && make
+      
+    - name: Functional Coverage
+      run: |
+        cd cocotb_sim// && var=$(cat results.xml | grep -o -E 'failure' | head -1 | cut -f2- -d\")
+        if [ "$var" = "failure" ]; then exit 1; else exit 0; fi
