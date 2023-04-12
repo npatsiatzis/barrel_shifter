@@ -1,5 +1,4 @@
 ![example workflow](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/regression_pyuvm.yml/badge.svg)
-![example workflow](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/coverage_pyuvm.yml/badge.svg)
 ### barrel-shifter RTL implementation
 
 
