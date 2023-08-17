@@ -18,4 +18,4 @@ prep -top barrel_shifter
 
 [files]
 barrel_shifter.psl
-../rtl/barrel_shifter.vhd
+../rtl/VHDL/barrel_shifter.vhd
