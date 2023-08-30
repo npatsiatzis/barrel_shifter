@@ -59,8 +59,11 @@ module barrel_shifter
             for (int i=0;i<=31;i++) begin
                 o_data[i] <= r_tmp[31 - i];
             end
-        end else if (i_data[$high(i_data)])
-            o_data <= ~r_tmp;
+        end else if (i_signed)
+            if (i_data[$high(i_data)])
+                o_data <= ~r_tmp;
+            else
+                o_data <= r_tmp;
         else
             o_data <= r_tmp;
     end

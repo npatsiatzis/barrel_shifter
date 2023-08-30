@@ -3,8 +3,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <memory>
+#include <set>
+#include <deque>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
+#include <verilated_cov.h>
 #include "Vbarrel_shifter.h"
 // #include "Vbarrel_shifter_synchronous_fifo.h"   //to get parameter values, after they've been made visible in SV
 
@@ -22,20 +25,20 @@ class InTx {
         uint32_t i_signed;
         uint32_t i_shift_left;
         uint32_t i_shift_amt;
-        uint32_t i_data;
+        int i_data;
 };
 
 
 // output interface transaction item class
 class OutTx {
     public:
-        uint32_t o_data;
+        int o_data;
 };
 
 //in domain Coverage
 class InCoverage{
     private:
-        std::set <uint32_t> in_cvg;
+        std::set <int> in_cvg;
     
     public:
         void write_coverage(InTx *tx){
@@ -45,7 +48,7 @@ class InCoverage{
             in_cvg.insert(tx->i_data);
         }
 
-        bool is_covered(uint32_t A){
+        bool is_covered(int A){
             // std::tuple<uint32_t,uint32_t> t;
             // t = std::make_tuple(A,B);            
             // return in_cvg.find(t) == in_cvg.end();
@@ -56,7 +59,7 @@ class InCoverage{
 //out domain Coverage
 class OutCoverage {
     private:
-        std::set <uint32_t> coverage;
+        std::set <int> coverage;
         int cvg_size = 0;
 
     public:
@@ -76,6 +79,15 @@ class OutCoverage {
 class Scb {
     private:
         std::deque<InTx*> in_q;
+
+        int get_2s_compl (int value, int num_of_bits) {
+            if((value + (1<<(num_of_bits-1))) >(1<<(num_of_bits))-1) {
+                return value - (1 << num_of_bits);
+            }
+            else {
+                return value;
+            }
+        }
         
     public:
         // Input interface monitor port
@@ -102,14 +114,21 @@ class Scb {
             if (in->i_shift_left == 1) {
                 expected_value = in->i_data << in->i_shift_amt;
             } else {
-                expected_value = in->i_data >> in->i_shift_amt;
-
+                if(in->i_signed == 1)
+                    expected_value = in->i_data >> in->i_shift_amt;
+                else 
+                    // in C/C++ for >> performs logical/arithmetic shift right
+                    // depending on sign. (there's no different symbols >>/>>> like SV)
+                    expected_value = ((uint32_t) in->i_data) >> in->i_shift_amt;
             }
 
-            if(expected_value != tx->o_data){
+            if(expected_value !=  tx->o_data){
                 std::cout << "Test Failure!" << std::endl;
                 std::cout << "Expected : " <<  expected_value << std::endl;
                 std::cout << "Got : " << tx->o_data << std::endl;
+                std::cout << "data is " << in->i_data << std::endl;
+                std::cout << "Shift left is " << in->i_shift_left << std::endl;
+                std::cout  << "signed is " << in->i_signed << " amt is " << in->i_shift_amt << std::endl;
                 exit(1);
             } else {
                 std::cout << "Test PASS!" << std::endl;
@@ -192,21 +211,43 @@ class OutMon {
         std::shared_ptr<Scb> scb;
         // OutCoverage *cvg;
         std::shared_ptr<OutCoverage> cvg;
+        int state;
     public:
         OutMon(std::shared_ptr<Vbarrel_shifter> dut, std::shared_ptr<Scb> scb, std::shared_ptr<OutCoverage> cvg){
             this->dut = dut;
             this->scb = scb;
             this->cvg = cvg;
+            state = 0;
         }
 
         void monitor(){
-                
-            OutTx *tx = new OutTx();
-            tx->o_data = dut->o_data;
 
-            // then pass the transaction item to the scoreboard
-            scb->writeOut(tx);
-            cvg->write_coverage(tx);
+            switch(state) {
+                case 0: {
+                    state = 1;
+                    break;
+                }
+                case 1: {
+                    state = 1;
+                    OutTx *tx = new OutTx();
+                    tx->o_data = dut->o_data;
+
+                    // then pass the transaction item to the scoreboard
+                    scb->writeOut(tx);
+                    cvg->write_coverage(tx);
+                    break;
+                }
+                default:
+                    state = 0;
+            }
+
+
+            // OutTx *tx = new OutTx();
+            // tx->o_data = dut->o_data;
+
+            // // then pass the transaction item to the scoreboard
+            // scb->writeOut(tx);
+            // cvg->write_coverage(tx);
             // }
         }
 };
@@ -230,14 +271,23 @@ class Sequence{
         InTx* genTx(){
             in = new InTx();
             // std::shared_ptr<InTx> in(new InTx());
-            // if(rand()%5 == 0){
-            in->i_data = rand() % (1 << 31);  
+            // rand()  works up to RAND_MAX, usually 2**15-1
+            // need special handling to get random 32-bits.
+            in->i_data = rand() & 0xff;
+            in->i_data |= (rand() & 0xff) << 8;
+            in->i_data |= (rand() & 0xff) << 16; 
+            in->i_data |= (rand() & 0xff) << 24; 
+
             in->i_shift_left = rand() % 2;
             in->i_signed = rand() % 2;  
-            in->i_shift_amt = rand() % 8;
+            in->i_shift_amt = rand() % 32;
 
             while(cvg->is_covered(in->i_data) == false){
-                in->i_data = rand() % (1 << 31);   
+   
+                in->i_data = rand() & 0xff;
+                in->i_data |= (rand() & 0xff) << 8;
+                in->i_data |= (rand() & 0xff) << 16; 
+                in->i_data |= (rand() & 0xff) << 24; 
             }
             return in;
             // } else {
@@ -310,13 +360,12 @@ int main(int argc, char** argv, char** env) {
                 // Monitor the output interface
                 // also writes recovered result (out transaction) to
                 // output coverage and scoreboard 
-                if(sim_time > VERIF_START_TIME){
-                    outMon->monitor();
-                }
+                outMon->monitor();
             }
         }
     }
 
+    VerilatedCov::write();
     m_trace->close();  
     exit(EXIT_SUCCESS);
 }
