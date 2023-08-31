@@ -30,19 +30,19 @@ waveform.vcd: ./obj_dir/V$(TOPLEVEL)
 .stamp.verilate: $(RTL_DIR)/$(TOPLEVEL).sv tb_$(TOPLEVEL).cpp
 	@echo
 	@echo "### VERILATING ###"
-	verilator --build -j --coverage --trace --trace-coverage -Wall --trace --x-assign unique --x-initial unique -I$(RTL_DIR) -cc $(RTL_DIR)/$(TOPLEVEL).sv --exe tb_$(TOPLEVEL).cpp
+	verilator --assert --build -j --coverage --trace --trace-coverage -Wall --trace --x-assign unique --x-initial unique -I$(RTL_DIR) -cc $(RTL_DIR)/$(TOPLEVEL).sv --exe tb_$(TOPLEVEL).cpp
 	@touch .stamp.verilate
 
 .PHONY:line_coverage
 line_coverage: sim
 	@echo "### Getting Line Coverage information ###"
-	@verilator_coverage --annotate annotated --annotate-min 1 -write-info annotated/merged.info coverage.dat
+	@verilator_coverage --annotate logs/annotated --annotate-min 1 -write-info logs/merged.info --write logs/merged.vcov logs/coverage.dat
 
 .PHONY:html_coverage
 html_coverage: line_coverage
 	@echo ""
 	@echo "### Generating html Coverage analysis ###"
-	@genhtml annotated/merged.info --output-directory html	
+	@genhtml logs/merged.info --output-directory html	
 
 .PHONY:lint
 lint: $(RTL_DIR)/$(TOPLEVEL).sv

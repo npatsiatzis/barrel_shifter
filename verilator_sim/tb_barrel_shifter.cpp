@@ -365,7 +365,9 @@ int main(int argc, char** argv, char** env) {
         }
     }
 
-    VerilatedCov::write();
+    // VerilatedCov::write();
+    Verilated::mkdir("logs");
+    Verilated::threadContextp()->coveragep()->write("logs/coverage.dat");
     m_trace->close();  
     exit(EXIT_SUCCESS);
 }

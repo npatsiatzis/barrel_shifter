@@ -68,4 +68,11 @@ module barrel_shifter
             o_data <= r_tmp;
     end
 
+                        /*          ######################      */
+                        /*          Assertions && Coverage      */
+                        /*          ######################      */
+
+    check_SRA : assert property (@(posedge i_clk) i_signed && !i_shift_left |=> signed'(o_data) == (signed'($past(i_data)) >>> $past(i_shift_amt)));
+    check_SRL : assert property (@(posedge i_clk) !i_signed && !i_shift_left |=> o_data == $past(i_data) >> $past(i_shift_amt));
+    check_SLA_SLL : assert property (@(posedge i_clk) i_shift_left |=> o_data == $past(i_data) << $past(i_shift_amt));
 endmodule : barrel_shifter
