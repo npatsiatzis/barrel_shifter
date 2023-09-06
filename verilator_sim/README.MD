@@ -1,3 +1,5 @@
+![example workflow](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/verilator_regression.yml/badge.svg)
+
 ### barrel-shifter RTL implementation
 
 

@@ -2,6 +2,8 @@
 ![example workflow](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/coverage.yml/badge.svg)
 ![example workflow](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/regression_pyuvm.yml/badge.svg)
 ![example workflow](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/formal.yml/badge.svg)
+![example workflow](https://github.com/npatsiatzis/barrel_shifter/actions/workflows/verilator_regression.yml/badge.svg)
+[![codecov](https://codecov.io/gh/npatsiatzis/barrel_shifter/graph/badge.svg?token=U5KUC9W346)](https://codecov.io/gh/npatsiatzis/barrel_shifter)
 
 ### barrel-shifter RTL implementation
 
