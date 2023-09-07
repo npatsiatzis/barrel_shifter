@@ -10,8 +10,12 @@ module barrel_shifter
         output logic [31 : 0] o_data
     );
 
-    const logic [15 : 0] c_fill = 0;
-
+    `ifdef ICARUS
+        logic [15 : 0] c_fill = 0;
+    `else
+        const logic [15 : 0] c_fill = 0;
+    `endif
+    
     always_ff @(posedge i_clk) begin : proc_shift
         logic [31 : 0] r_tmp;
         if (i_shift_left) begin
@@ -68,11 +72,22 @@ module barrel_shifter
             o_data <= r_tmp;
     end
 
+    `ifdef WAVEFORM
+        initial begin
+            // Dump waves
+            $dumpfile("dump.vcd");
+            $dumpvars(0, barrel_shifter);
+        end
+    `endif
+
+
                         /*          ######################      */
                         /*          Assertions && Coverage      */
                         /*          ######################      */
 
-    check_SRA : assert property (@(posedge i_clk) i_signed && !i_shift_left |=> signed'(o_data) == (signed'($past(i_data)) >>> $past(i_shift_amt)));
-    check_SRL : assert property (@(posedge i_clk) !i_signed && !i_shift_left |=> o_data == $past(i_data) >> $past(i_shift_amt));
-    check_SLA_SLL : assert property (@(posedge i_clk) i_shift_left |=> o_data == $past(i_data) << $past(i_shift_amt));
+    `ifdef FORMAL
+        check_SRA : assert property (@(posedge i_clk) i_signed && !i_shift_left |=> signed'(o_data) == (signed'($past(i_data)) >>> $past(i_shift_amt)));
+        check_SRL : assert property (@(posedge i_clk) !i_signed && !i_shift_left |=> o_data == $past(i_data) >> $past(i_shift_amt));
+        check_SLA_SLL : assert property (@(posedge i_clk) i_shift_left |=> o_data == $past(i_data) << $past(i_shift_amt));
+    `endif
 endmodule : barrel_shifter
