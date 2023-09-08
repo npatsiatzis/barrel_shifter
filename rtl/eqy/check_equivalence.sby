@@ -1,0 +1,11 @@
+[gold]
+read_verilog -sv ../SystemVerilog/barrel_shifter.sv
+prep -top barrel_shifter
+
+[gate]
+ghdl --std=08 ../VHDL/barrel_shifter.vhd -e barrel_shifter
+prep -top barrel_shifter
+
+[strategy simple]
+use sat
+depth 10
