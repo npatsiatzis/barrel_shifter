@@ -24,7 +24,7 @@ This is a short tabular description of the contents of each folder in the repo.
 | [pyuvm_sim](https://github.com/npatsiatzis/barrel_shifter/tree/main/pyuvm_sim) | Functional Verification with pyUVM (Python impl. of UVM standard) |
 | [uvm_sim](https://github.com/npatsiatzis/barrel_shifter/tree/main/uvm_sim) | Functional Verification with UVM (SV impl. of UVM standard) |
 | [verilator_sim](https://github.com/npatsiatzis/barrel_shifter/tree/main/verilator_sim) | Functional Verification with Verilator (C++ based) |
-| [mcy_sim](https://github.com/npatsiatzis/simple_adder/tree/main/mcy_sim) | Mutation Coverage Testing of Verilator tb, using  [YoysHQ/mcy](https://github.com/YosysHQ/oss-cad-suite-build)|
+| [mcy_sim](https://github.com/npatsiatzis/barrel_shifter/tree/main/mcy_sim) | Mutation Coverage Testing of Verilator tb, using  [YoysHQ/mcy](https://github.com/YosysHQ/oss-cad-suite-build)|
 | [formal](https://github.com/npatsiatzis/barrel_shifter/tree/main/formal) | Formal Verification using  PSL properties and [YoysHQ/sby](https://github.com/YosysHQ/oss-cad-suite-build) |
 
 
