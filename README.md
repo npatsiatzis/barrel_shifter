@@ -50,8 +50,8 @@ This is the tree view of the strcture of the repo.
 │   ├── Makefile
 │   └── verilator tb
 ├── <font size = "4"><b><a href="https://github.com/npatsiatzis/barrel_shifter/tree/main/mcy_sim">mcy_sim</a></b></font>
-│   ├── Makefile
-│   └── verilator tb
+    ├── Makefile, (modified) SV files, Verilator tb
+    └── scripts
 └── <font size = "4"><b><a href="https://github.com/npatsiatzis/barrel_shifter/tree/main/formal">formal</a></b></font>
     ├── Makefile
     └── PSL properties file, scripts
