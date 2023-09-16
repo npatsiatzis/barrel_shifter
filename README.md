@@ -27,7 +27,7 @@ This is a short tabular description of the contents of each folder in the repo.
 | [mcy_sim](https://github.com/npatsiatzis/simple_adder/tree/main/mcy_sim) | Mutation Coverage Testing of Verilator tb, using  [YoysHQ/mcy](https://github.com/YosysHQ/oss-cad-suite-build)|
 | [formal](https://github.com/npatsiatzis/barrel_shifter/tree/main/formal) | Formal Verification using  PSL properties and [YoysHQ/sby](https://github.com/YosysHQ/oss-cad-suite-build) |
 
-<!-- 
+
 This is the tree view of the strcture of the repo.
 <pre>
 <font size = "2">
@@ -55,4 +55,4 @@ This is the tree view of the strcture of the repo.
 └── <font size = "4"><b><a href="https://github.com/npatsiatzis/barrel_shifter/tree/main/formal">formal</a></b></font>
     ├── Makefile
     └── PSL properties file, scripts
-</pre> -->
+</pre>
