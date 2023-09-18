@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <memory>
 #include <set>
+#include <map>
+#include <tuple>
 #include <deque>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
@@ -14,9 +16,13 @@
 
 #define MAX_SIM_TIME 300
 #define VERIF_START_TIME 7
-#define COVERAGE_BITS 10
 vluint64_t sim_time = 0;
 vluint64_t posedge_cnt = 0;
+
+#define COVERAGE_BITS 10 // thtis controls how much of the 32 bit i_data space we cover
+// the rest of the input space, i.e. 5-bit i_shift_amt and i_signed,i_shift_left (1 bit each)
+// is covered in its entirety.
+
 
 // input interface transaction item class
 class InTx {
@@ -38,21 +44,28 @@ class OutTx {
 //in domain Coverage
 class InCoverage{
     private:
-        std::set <int> in_cvg;
+        // std::set <int> in_cvg;
+        std::map <std::tuple <uint32_t, uint32_t, uint32_t, uint32_t>, uint32_t > in_cvg;
     
     public:
         void write_coverage(InTx *tx){
-            // std::tuple<uint32_t,uint32_t> t;
-            // t = std::make_tuple(tx->A,tx->B);
-            // in_cvg.insert(t);
-            in_cvg.insert(tx->i_data);
+            std::tuple <uint32_t,uint32_t,uint32_t,uint32_t> t;
+            t = std::make_tuple(tx->i_signed,tx->i_shift_left,tx->i_shift_amt,tx->i_data);        
+            in_cvg.insert({t,1});
         }
 
-        bool is_covered(int A){
-            // std::tuple<uint32_t,uint32_t> t;
-            // t = std::make_tuple(A,B);            
-            // return in_cvg.find(t) == in_cvg.end();
-            return in_cvg.find(A) == in_cvg.end();
+        // bool is_covered(int A){
+        bool is_covered(uint32_t v_signed,uint32_t v_shift_left,uint32_t v_shift_amt,uint32_t v_data){
+            std::tuple <uint32_t,uint32_t,uint32_t,uint32_t> t;
+            t = std::make_tuple(v_signed,v_shift_left,v_shift_amt,v_data);
+
+
+            return in_cvg.find(t) == in_cvg.end();
+        }
+
+        bool is_full_coverage(){
+            // coverage goal for the the cross product AxB, minus the duplicates, i.e (1,1),(2,2) etc..
+            return in_cvg.size() == (1<< (2+5+COVERAGE_BITS)); //shift_left,signed,shift_amt(5),data(COVERAGE_BITS)
         }
 };
 
@@ -70,7 +83,6 @@ class OutCoverage {
 
         bool is_full_coverage(){
             return cvg_size == (1 << COVERAGE_BITS);
-            // return coverage.size() == (1 << (Vbarrel_shifter_synchronous_fifo::G_WIDTH));
         }
 };
 
@@ -282,7 +294,7 @@ class Sequence{
             in->i_signed = rand() % 2;  
             in->i_shift_amt = rand() % 32;
 
-            while(cvg->is_covered(in->i_data) == false){
+            while(cvg->is_covered(in->i_signed,in->i_shift_left,in->i_shift_amt,in->i_data) == false){
    
                 in->i_data = rand() & 0xff;
                 in->i_data |= (rand() & 0xff) << 8;
@@ -330,7 +342,8 @@ int main(int argc, char** argv, char** env) {
     std::unique_ptr<OutMon> outMon(new OutMon(dut,scb,outCoverage));
     std::unique_ptr<Sequence> sequence(new Sequence(inCoverage));
 
-    while (outCoverage->is_full_coverage() == false) {
+    // while (outCoverage->is_full_coverage() == false) {
+    while (inCoverage->is_full_coverage() == false) {
         // dut_reset(dut, sim_time);
         dut->i_clk ^= 1;
         dut->eval();
