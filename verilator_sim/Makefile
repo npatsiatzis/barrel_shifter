@@ -1,4 +1,4 @@
-TOPLEVEL = barrel_shifter
+TOPLEVEL = top
 MODULE = tb_$(TOPLEVEL).cpp
 RTL_DIR = ./../rtl/SystemVerilog
 

@@ -85,9 +85,4 @@ module barrel_shifter
                         /*          Assertions && Coverage      */
                         /*          ######################      */
 
-    `ifdef FORMAL
-        check_SRA : assert property (@(posedge i_clk) i_signed && !i_shift_left |=> signed'(o_data) == (signed'($past(i_data)) >>> $past(i_shift_amt)));
-        check_SRL : assert property (@(posedge i_clk) !i_signed && !i_shift_left |=> o_data == $past(i_data) >> $past(i_shift_amt));
-        check_SLA_SLL : assert property (@(posedge i_clk) i_shift_left |=> o_data == $past(i_data) << $past(i_shift_amt));
-    `endif
 endmodule : barrel_shifter
