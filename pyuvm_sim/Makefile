@@ -6,7 +6,7 @@ TOPLEVEL_LANG ?= vhdl
 ifeq ($(TOPLEVEL_LANG),verilog)
 	SIM ?= icarus
 	TOPLEVEL_LANG ?= verilog
-	VERILOG_SOURCES += $(PWD)/../rtl/SystemVerilog/*.sv
+	VERILOG_SOURCES += $(PWD)/../rtl/SystemVerilog/barrel_shifter.sv
 	COMPILE_ARGS += -DWAVEFORM -DICARUS
 	WAVES=1
 	MODULE_NAME = tb

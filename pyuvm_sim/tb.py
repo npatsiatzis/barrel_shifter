@@ -7,10 +7,13 @@ from pyuvm import *
 import random
 import cocotb
 import pyuvm
-from utils import BarrelShiftBfm
+from utils import BarrelShiftBfm,AssertionsCheck
 from cocotb_coverage.coverage import CoverCross,CoverPoint,coverage_db
+from cocotb.binary import BinaryValue
 
-covered_values = [i for i in range(5)]
+input_data_range = range(-128,128)
+
+covered_values = [i for i in input_data_range]
 
 
 covered_cross = []
@@ -19,23 +22,17 @@ full_cross = False
 def notify():
     global full_cross
     full_cross = True
-
-def sum_pow_2(length,vector):
-    sum = 0
-    bin_vec = bin(vector)
-    if((len(bin_vec) == 34) and (bin_vec[2] == '1')):
-        for i in range(length):
-            sum += 2**(31-i)
-    return sum  
+ 
 
 # at_least = value is superfluous, just shows how you can determine the amount of times that
 # a bin must be hit to considered covered
 @CoverPoint("top.signed",xf = lambda x : x.is_signed, bins = [True,False], at_least=1)
 @CoverPoint("top.shift_left",xf = lambda x : x.shift_left, bins = [True,False],at_least=1)
-@CoverPoint("top.shift_amt",xf = lambda x : x.shift_amt,bins = list(range(2**3)),at_least=1)
-@CoverPoint("top.i_data",xf = lambda x : x.data,bins = list(range(2**5)),at_least=1)
+@CoverPoint("top.shift_amt",xf = lambda x : x.shift_amt,bins = list(range(2**5)),at_least=1)
+@CoverPoint("top.i_data",xf = lambda x : x.data,bins = list(input_data_range),at_least=1)
 @CoverCross("top.shift_amt_X_i_data", items = ["top.signed","top.shift_left","top.shift_amt","top.i_data"], at_least=1)
 def number_cover(dut):
+    covered_cross.append((dut.is_signed,dut.shift_left,dut.shift_amt,dut.data))
     pass
 
 class crv_inputs(crv.Randomized):
@@ -47,8 +44,8 @@ class crv_inputs(crv.Randomized):
         self.data = data
         self.add_rand("is_signed",list(range(2)))
         self.add_rand("shift_left",list(range(2)))
-        self.add_rand("shift_amt",list(range(2**3)))
-        self.add_rand("data",list(range(2**5)))
+        self.add_rand("shift_amt",list(range(2**5)))
+        self.add_rand("data",list(input_data_range))
 
 # Sequence classes
 class SeqItem(uvm_sequence_item):
@@ -68,12 +65,15 @@ class RandomSeq(uvm_sequence):
             data_tr = SeqItem("data_tr", None, None,None,None)
             await self.start_item(data_tr)
             data_tr.randomize_operands()
+            while((data_tr.i_crv.is_signed,data_tr.i_crv.shift_left,data_tr.i_crv.shift_amt,data_tr.i_crv.data) in covered_cross):
+                data_tr.randomize_operands()
             # while(data_tr.i_crv.data in covered_values):
             #     data_tr.randomize_operands()
             # covered_values.append(data_tr.i_crv.data)
 
             number_cover(data_tr.i_crv)
             coverage_db["top.shift_amt_X_i_data"].add_threshold_callback(notify, 100)
+            print("Coverage is at {} %".format(coverage_db["top.shift_amt_X_i_data"].cover_percentage))
             await self.finish_item(data_tr)
 
 class TestAllSeq(uvm_sequence):
@@ -90,9 +90,11 @@ class Driver(uvm_driver):
 
     def start_of_simulation_phase(self):
         self.bfm = BarrelShiftBfm()
+        self.assertions_check = AssertionsCheck()
 
     async def launch_tb(self):
         await self.bfm.reset()
+        self.assertions_check.start_assertions()
         self.bfm.start_bfm()
 
     async def run_phase(self):
@@ -101,9 +103,9 @@ class Driver(uvm_driver):
             data = await self.seq_item_port.get_next_item()
             await self.bfm.send_data((data.i_crv.is_signed, data.i_crv.shift_left,data.i_crv.shift_amt,data.i_crv.data))
 
-            result = await self.bfm.get_result()
-            self.ap.write(result)
-            data.result = result
+            # result = await self.bfm.get_result()
+            # self.ap.write(result)
+            # data.result = result
             self.seq_item_port.item_done()
 
 
@@ -114,6 +116,7 @@ class Coverage(uvm_subscriber):
 
     def write(self, data):
         (is_signed,shift_left,shift_amt,orig_data) = data
+        orig_data = BinaryValue(value=str(orig_data),bigEndian=False ,n_bits=32,binaryRepresentation=2)
         if((int(orig_data)) not in self.cvg):
             self.cvg.add(int(orig_data))
 
@@ -157,13 +160,27 @@ class Scoreboard(uvm_component):
             _, actual_result = self.result_get_port.try_get()
             data_success, data = self.data_get_port.try_get()
 
-            (is_signed,shift_left,shift_amt,orig_data) = data
-            if(shift_left == 1):
-                expected_value = orig_data << shift_amt
+            (is_signed,shift_left,shift_amt,orig_data) = data            
+            
+            if(int(shift_left) == 1):
+                orig_data = BinaryValue(value=str(orig_data),bigEndian=False ,n_bits=32,binaryRepresentation=0)
+                orig_data = orig_data.integer
+                expected_value = int(orig_data) << int(shift_amt)
+                expected_value = expected_value & ((2**32) -1)
             else:
-                expected_value = orig_data >> shift_amt
-                if(is_signed ==1):
-                    expected_value = expected_value + sum_pow_2(shift_amt,orig_data)
+                if(int(is_signed) == 1):
+                    orig_data = BinaryValue(value=str(orig_data),bigEndian=False ,n_bits=32,binaryRepresentation=2)
+                    orig_data = orig_data.integer
+
+
+                    actual_result = BinaryValue(value=str(actual_result),bigEndian=False ,n_bits=32,binaryRepresentation=2)
+                    actual_result = actual_result.integer
+                    
+                    expected_value = int(orig_data) >> int(shift_amt)
+                else:
+                    orig_data = BinaryValue(value=str(orig_data),bigEndian=False ,n_bits=32,binaryRepresentation=0)
+                    orig_data = orig_data.integer
+                    expected_value = int(orig_data) >> int(shift_amt)
 
             if not data_success:
                 self.logger.critical(f"result {actual_result} had no command")
@@ -173,7 +190,7 @@ class Scoreboard(uvm_component):
                     print("i_tx_data is {}, rx_data is {}".format(int(expected_value),int(actual_result)))
                 else:
                     self.logger.error("FAILED")
-                    print("i_tx_data is {}, rx_data is {}".format(int(expected_value),int(actual_result)))
+                    print("i_tx_data is {}, rx_data is {}, i_signed is {}, i_shift_left is {}, i_shift_amt is {}".format(int(expected_value),int(actual_result),is_signed,shift_left,shift_amt))
                     passed = False
         assert passed
 
@@ -201,6 +218,7 @@ class Env(uvm_env):
         ConfigDB().set(None, "*", "SEQR", self.seqr)
         self.driver = Driver.create("driver", self)
         self.data_mon = Monitor("data_mon", self, "get_data")
+        self.result_mon = Monitor("result_mon",self,"get_result")
         self.coverage = Coverage("coverage", self)
         self.scoreboard = Scoreboard("scoreboard", self)
 
@@ -208,7 +226,8 @@ class Env(uvm_env):
         self.driver.seq_item_port.connect(self.seqr.seq_item_export)
         self.data_mon.ap.connect(self.scoreboard.data_export)
         self.data_mon.ap.connect(self.coverage.analysis_export)
-        self.driver.ap.connect(self.scoreboard.result_export)
+        # self.driver.ap.connect(self.scoreboard.result_export)
+        self.result_mon.ap.connect(self.scoreboard.result_export)
 
 
 @pyuvm.test()
