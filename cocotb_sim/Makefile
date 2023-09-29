@@ -2,20 +2,35 @@
 
 # defaults
 TOPLEVEL_LANG ?= vhdl
+TOPLEVEL = barrel_shifter
 
 ifeq ($(TOPLEVEL_LANG),verilog)
-	SIM ?= icarus
-	TOPLEVEL_LANG ?= verilog
-	VERILOG_SOURCES += $(PWD)/../rtl/SystemVerilog/*.sv
-	COMPILE_ARGS += -DWAVEFORM -DICARUS
-	WAVES=1
-	MODULE_NAME = testbench
+	ifeq ($(SIM),modelsim)			#32-bit sim, 32-bit python required
+		SIM ?= modelsim
+		TOPLEVEL_LANG ?= verilog
+		VERILOG_SOURCES += $(PWD)/../rtl/SystemVerilog/barrel_shifter.sv
+		WAVES=1
+		MODULE = testbench
+	else 
+		SIM ?= icarus				#64-bit sim, 64-bit python required
+		TOPLEVEL_LANG ?= verilog
+		VERILOG_SOURCES += $(PWD)/../rtl/SystemVerilog/barrel_shifter.sv
+		COMPILE_ARGS += -DWAVEFORM -DICARUS
+		WAVES=1
+		MODULE = testbench
+	endif
 else ifeq ($(TOPLEVEL_LANG),vhdl)
-	SIM ?= ghdl
-	EXTRA_ARGS += --std=08
-	SIM_ARGS += --wave=wave.ghw
-	VHDL_SOURCES += $(PWD)/../rtl/VHDL/*.vhd
-	MODULE_NAME = testbench
+	ifeq ($(SIM),modelsim)
+		SIM ?= modelsim
+		VHDL_SOURCES += $(PWD)/../rtl/VHDL/barrel_shifter.vhd
+		MODULE = testbench
+	else 
+		SIM ?= ghdl
+		EXTRA_ARGS += --std=08
+		SIM_ARGS += --wave=wave.ghw
+		VHDL_SOURCES += $(PWD)/../rtl/VHDL/barrel_shifter.vhd
+		MODULE = testbench
+	endif
 endif
 
 
@@ -27,8 +42,8 @@ endif
 #where python will look for modules and packages
 export PYTHONPATH := $(PWD)/../model:$(PYTHONPATH)
 
-test_adder:
-		$(MAKE) sim MODULE=$(MODULE_NAME) TOPLEVEL=barrel_shifter
+testr:
+		$(MAKE) sim 
 
 lint: $(VHDL_SOURCES)
 	vsg --style jcl -f $^

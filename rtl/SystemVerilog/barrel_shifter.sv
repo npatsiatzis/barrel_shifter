@@ -1,5 +1,3 @@
-`default_nettype none
-
 module barrel_shifter
     (
         input logic i_clk,
