@@ -14,7 +14,7 @@ verification.
 
    The verification plan provides a definition of the testbench, verification 
 properties, test environment, coverage sequences, application of test cases, and 
-verification approaches for the UART design as specified in the requirement 
+verification approaches for the barrel shifter design as specified in the requirement 
 specification number barrel_shufter_req_001(Specification.md).
    The goals of this plan is not only to provide an outline on how the component 
 will be tested, but also to provide a strawman document that can be scrutinized 
@@ -57,9 +57,9 @@ by other design and system engineers to refine the verification approach.
 verification language because it is an open language that provides good 
 constructs and verification features. This plan consists of the following:
 * **Feature Extractions and Test Strategy**
-* **Test application approach for the UART**
+* **Test application approach for the barrel shifter**
 * **Test verification approach**
-*
+  
 1. **Feature Extractions and Test Strategy**
 
    The design features are extracted from the requirements specification. For each 
