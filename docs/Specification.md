@@ -49,7 +49,7 @@ No particular interface will be used in the initial phase of this core for commu
 
 ### 5. PHYSICAL LAYER
 
-1. i_data_valid, input data to be shifted
+1. i_data, input data to be shifted
 1. signed, indicate whether input data should be treated as a signed number
 5. shift_left, specify shift direction
 6. shit_amt, specify amount of bits to shift the data
